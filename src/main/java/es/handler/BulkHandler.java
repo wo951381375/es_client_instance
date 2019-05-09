@@ -1,10 +1,12 @@
 package es.handler;
 
+import es.result.ESResult;
+import es.utils.JsonNoNullUtil;
+import es.utils.JsonUtil;
+import es.exception.GenericBusinessException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.*;
-import es.result.BulkResult;
-import es.utils.JsonMapperUtil;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -18,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class BulkHandler<T> extends ESBaseHandler {
@@ -33,6 +34,11 @@ public class BulkHandler<T> extends ESBaseHandler {
 
         private List params;
 
+        /**
+         * 输入空值,是否覆盖操作,默认 false
+         * */
+        private boolean coverYn;
+
         //单行执行bulk
         private static final Integer BULK_LIMIT = 5000;
 
@@ -40,9 +46,10 @@ public class BulkHandler<T> extends ESBaseHandler {
                 this.client = client;
         }
 
-        public BulkResult execute(){
+        public ESResult execute() throws GenericBusinessException {
+                validate();
                 doExecute();
-                return new BulkResult(error,retBool,count.get(),"");
+                return new ESResult(retBool,error,count.get());
         }
 
         private void doExecute() {
@@ -59,7 +66,7 @@ public class BulkHandler<T> extends ESBaseHandler {
                                 //limit/5000
                                 BulkRequestBuilder bulk = this.getUpdateOrInsertResponse(list);
                                 if (Objects.isNull(bulk)){
-                                        log.error("Document Id Is Not Fount , Please Check Your Params, Params:{}", JsonMapperUtil.transFormationJson(list));
+                                        log.error("Document Id Is Not Fount , Please Check Your Params, Params:{}", JsonNoNullUtil.transFormationJson(list));
                                         continue;
                                 }
                                 ListenableFuture<Integer> ask = service.submit(new Callable<Integer>() {
@@ -92,10 +99,10 @@ public class BulkHandler<T> extends ESBaseHandler {
                                 });
                         }
                         ListenableFuture<List<Integer>> listenableFuture = Futures.successfulAsList(futureList);
-                        // 等待60秒，如果没取到数据则跳出, 且可以获取成功结果集
+                        // 默认等待60秒，如果没取到数据则跳出, 且可以获取成功结果集
                         listenableFuture.get(TIMEOUT, TimeUnit.SECONDS);
                 } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("error",e);
                         List<String> collect = getDocumentId(params);
                         error.addAll(collect);
                 }finally {
@@ -108,7 +115,7 @@ public class BulkHandler<T> extends ESBaseHandler {
         private List<String> getDocumentId(List result){
                 List<String> res = Lists.newLinkedList();
                 for (Object obj : result){
-                        Map map = JsonMapperUtil.transFormationMapNoNullVal(obj,Map.class);
+                        Map map = JsonNoNullUtil.transFormationMapNoNullVal(obj,Map.class);
                         Object id = map.get(DOCUMENTID);
                         if (!Objects.isNull(id)){
                                 res.add(id.toString());
@@ -122,8 +129,13 @@ public class BulkHandler<T> extends ESBaseHandler {
         private BulkRequestBuilder getUpdateOrInsertResponse(List<Object> list) {
                 BulkRequestBuilder bulk = client.prepareBulk();
                 for (Object obj : list) {
-                        //获取非空Map
-                        Map<String,Object> map = JsonMapperUtil.transFormationMapNoNullVal(obj,Map.class);
+                        Map<String,Object> map = null;
+                        // 是否空值覆盖
+                        if (coverYn){
+                            map = JsonUtil.transFormationMap(obj,Map.class);
+                        }else {
+                            map = JsonNoNullUtil.transFormationMapNoNullVal(obj,Map.class);
+                        }
                         if (Objects.isNull(map.get(DOCUMENTID))) {
                                 continue;
                         }
@@ -186,8 +198,24 @@ public class BulkHandler<T> extends ESBaseHandler {
                 return this;
         }
 
+        public BulkHandler setCoverYn(boolean coverYn) {
+                this.coverYn = coverYn;
+                return this;
+        }
+
         public List<String> getError() {
                 return error;
+        }
+
+        @Override
+        public Boolean validate() throws GenericBusinessException {
+                if (DOCUMENTID == null || DOCUMENTID.equals("")){
+                        throw new GenericBusinessException("DOCUMENTID IS NOT NULL");
+                }
+                if (params == null || params.isEmpty()){
+                        throw new GenericBusinessException("params IS NOT NULL");
+                }
+                return super.validate();
         }
 }
 

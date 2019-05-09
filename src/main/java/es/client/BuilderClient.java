@@ -1,8 +1,7 @@
-package es;
+package es.client;
 
 import es.config.ESInstance;
-import es.handler.BulkHandler;
-import es.handler.QueryHandler;
+import es.handler.*;
 import org.elasticsearch.client.transport.TransportClient;
 
 public class BuilderClient {
@@ -31,15 +30,30 @@ public class BuilderClient {
          *         clazz : 返回值类型       必填
          *         search : 查询实体类       必填
          *         queryEnum : 自定义中文字段查询方式
-         *         handler : 自定义查询方式 查询条件
+         *         ProcessorServiceImpl : 自定义查询方式 查询条件
          *         sortField : 自定义排序字段
          *         from : 开始下标
          *         size : 展示数量
          * }
          *
          * */
-        public QueryHandler queryHandler(String index){
-                return new QueryHandler(client).setINDEX(index);
+        public QueryFieldHandler queryFieldHandler(String index){
+                return new QueryFieldHandler(client).setINDEX(index);
+        }
+
+
+        /**
+         * 使用注意:
+         * Params:{
+         *         INDEX : 真实索引索引       必填
+         *         INDEXTYPE : 索引类型      必填
+         *         clazz: 返回值类型         必填
+         *         documentIds : 索引文档Id         必填
+         * }
+         *
+         * */
+        public QueryDocumentHandler queryDocumentHandler(String index){
+                return new QueryDocumentHandler(client).setINDEX(index);
         }
 
         /**
@@ -59,11 +73,39 @@ public class BuilderClient {
          *         param : 存储数据       必填
          *         THREAD_COUNT : 存储数据量大于 5000 时, 可适当调整, 默认 1
          *         timeout : 响应超时时间, 单位(秒), 默认 60s
+         *         coverYn : 是否空值覆盖     默认 false
          * }
          *
          * */
         public BulkHandler bulkHandler(String index){
                 return new BulkHandler(client).setINDEX(index);
+        }
+
+        /**
+         * 使用注意:
+         * Params:{
+         *         INDEX : 真实索引索引       必填
+         *         INDEXTYPE : 索引类型      必填
+         *         documentIds : 索引文档Id         必填
+         * }
+         *
+         * */
+        public DeleteHandler deleteHandler(String index){
+                return new DeleteHandler(client).setINDEX(index);
+        }
+
+        /**
+         * 谨慎使用, 清空索引内所有数据
+         * */
+        public EmptyHandler emptyHandler(String index){
+                return new EmptyHandler(client).setINDEX(index);
+        }
+
+        /**
+         *
+         * */
+        public UpdateHandler updateHandler(String index){
+                return new UpdateHandler(client).setINDEX(index);
         }
 
         public TransportClient getClient() {

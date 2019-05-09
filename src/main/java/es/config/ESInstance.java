@@ -55,7 +55,7 @@ public class ESInstance {
                                 }
                                 log.info("ES start ---------> "+CLUSTER_NAME+"---"+CLUSTER_NODES);
                         } catch (UnknownHostException e) {
-                                e.printStackTrace();
+                                log.error("error",e);
                         }
                         return client;
                 }

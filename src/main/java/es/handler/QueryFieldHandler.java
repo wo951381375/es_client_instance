@@ -1,11 +1,13 @@
 package es.handler;
 
-import com.google.common.collect.Lists;
 import es.enums.QueryEnum;
 import es.perpare.PrepareQuery;
 import es.perpare.PrepareQueryImpl;
-import es.result.QueryResult;
-import es.utils.JsonMapperUtil;
+import es.result.ESResult;
+import es.utils.JsonNoNullUtil;
+import es.exception.GenericBusinessException;
+import com.google.common.collect.Lists;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.transport.TransportClient;
@@ -17,13 +19,13 @@ import org.elasticsearch.search.sort.SortOrder;
 import java.util.List;
 import java.util.Objects;
 
-public class QueryHandler<T> extends ESBaseHandler {
+public class QueryFieldHandler<T> extends ESBaseHandler {
 
         private int from = 0;
 
         private int size = 100;
 
-        private String sortField = "id";
+        private String sortField;
 
         private List<T> data;
 
@@ -35,13 +37,14 @@ public class QueryHandler<T> extends ESBaseHandler {
 
         private QueryEnum queryEnum = QueryEnum.termsQuery;
 
-        public QueryHandler(TransportClient client) {
+        public QueryFieldHandler(TransportClient client) {
                 this.client = client;
         }
 
-        public QueryResult execute(){
+        public ESResult execute() throws GenericBusinessException {
+                validate();
                 doExecute();
-                return new QueryResult(retBool,count.get(),data);
+                return new ESResult(retBool,count.get(),data);
         }
 
         private void doExecute() {
@@ -50,6 +53,7 @@ public class QueryHandler<T> extends ESBaseHandler {
                 }
                 // 获取查询条件
                 BoolQueryBuilder boolQuery = this.handler.getBoolQueryBuilder(search, queryEnum);
+                System.out.println(boolQuery);
                 // 查询
                 SearchResponse response = this.prepareSearch(boolQuery);
                 if (Objects.isNull(response)){
@@ -66,7 +70,7 @@ public class QueryHandler<T> extends ESBaseHandler {
         private List<T> getHitsToResponse(SearchHits searchHits) {
                 List<T> data = Lists.newArrayList();
                 for (SearchHit hit : searchHits.getHits()) {
-                        T o = JsonMapperUtil.transFormationMapNoNullVal(hit.getSourceAsString(),clazz);
+                        T o = JsonNoNullUtil.transFormationMapNoNullVal(hit.getSourceAsString(),clazz);
                         data.add(o);
                 }
                 return data;
@@ -88,64 +92,75 @@ public class QueryHandler<T> extends ESBaseHandler {
                  * 2.SearchType.SCAN = 扫描查询,无序
                  * 3.SearchType.COUNT = 不设置的话	,分词查询
                  * */
-                SearchResponse response = client.prepareSearch(INDEX)
+                SearchRequestBuilder searchRequestBuilder = client.prepareSearch(INDEX)
                         .setTypes(INDEX_TYPE)
                         .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
                         .setQuery(boolQuery)
-                        .addSort(sortField, SortOrder.ASC)
                         .setFrom(from)
-                        .setSize(size)
-                        .get();
-                //如果查询数量大于10000,使用游标查询方式
-                return response;
+                        .setSize(size);
+                if (sortField != null && !sortField.equals("")){
+                        searchRequestBuilder.addSort(sortField,SortOrder.ASC);
+                }
+                return searchRequestBuilder.get();
         }
 
-        public QueryHandler setINDEX(String INDEX) {
+        public QueryFieldHandler setINDEX(String INDEX) {
                 this.INDEX = INDEX;
                 return this;
         }
 
-        public QueryHandler setINDEX_TYPE(String INDEX_TYPE) {
+        public QueryFieldHandler setINDEX_TYPE(String INDEX_TYPE) {
                 this.INDEX_TYPE = INDEX_TYPE;
                 return this;
         }
 
-        public QueryHandler setFrom(int from) {
+        public QueryFieldHandler setFrom(int from) {
                 this.from = from;
                 return this;
         }
 
-        public QueryHandler setSize(int size) {
+        public QueryFieldHandler setSize(int size) {
                 this.size = size;
                 return this;
         }
 
-        public QueryHandler setSortField(String sortField) {
+        public QueryFieldHandler setSortField(String sortField) {
                 this.sortField = sortField;
                 return this;
         }
 
-        public QueryHandler setClazz(Class<T> clazz) {
+        public QueryFieldHandler setClazz(Class<T> clazz) {
                 this.clazz = clazz;
                 return this;
         }
 
-        public QueryHandler setHandler(PrepareQuery handler) {
+        public QueryFieldHandler setHandler(PrepareQuery handler) {
                 this.handler = handler;
                 return this;
         }
 
-        public QueryHandler setSearch(Object search) {
+        public QueryFieldHandler setSearch(Object search) {
                 this.search = search;
                 return this;
         }
 
-        public QueryHandler setQueryEnum(QueryEnum queryEnum) {
+        public QueryFieldHandler setQueryEnum(QueryEnum queryEnum) {
                 this.queryEnum = queryEnum;
                 return this;
         }
 
         public List<T> getData() {
                 return data;
+        }
+
+        @Override
+        public Boolean validate() throws GenericBusinessException {
+                if (clazz == null){
+                        throw new GenericBusinessException("clazz IS NOT NULL");
+                }
+                if (search == null){
+                        throw new GenericBusinessException("search IS NOT NULL");
+                }
+                return super.validate();
         }
 }

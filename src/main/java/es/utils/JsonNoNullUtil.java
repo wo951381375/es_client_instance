@@ -3,15 +3,18 @@ package es.utils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.BuilderClient;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.client.transport.TransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 
-public class JsonMapperUtil {
+public class JsonNoNullUtil {
 
+        public static final Logger log = LoggerFactory.getLogger(JsonNoNullUtil.class);
 
         private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -33,7 +36,7 @@ public class JsonMapperUtil {
                 try {
                         return mapper.readValue(json, cls);
                 } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("error",e);
                 }
                 return null;
         }
@@ -47,7 +50,7 @@ public class JsonMapperUtil {
                 try {
                         return (T) mapper.readValue(json, clazz);
                 } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("error",e);
                 }
                 return null;
         }
@@ -56,9 +59,22 @@ public class JsonMapperUtil {
                 try {
                         return mapper.writeValueAsString(obj);
                 } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                        log.error("error",e);
                 }
                 return "";
+        }
+
+        public static <T extends Object> List<T> jsonToList(String json, Class<T> bean){
+                if (StringUtils.isBlank(json)) {
+                        return null;
+                }
+                try {
+                        JavaType javaType = mapper.getTypeFactory().constructParametricType(List.class, bean);
+                        return mapper.readValue(json, javaType);
+                } catch (IOException e) {
+                        log.error("error",e);
+                }
+                return null;
         }
 
 }

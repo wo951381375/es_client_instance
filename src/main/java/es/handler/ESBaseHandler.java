@@ -1,6 +1,7 @@
 package es.handler;
 
-import es.BuilderClient;
+import es.client.BuilderClient;
+import es.exception.GenericBusinessException;
 import org.elasticsearch.client.transport.TransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,5 +28,15 @@ public class ESBaseHandler {
 
         public boolean isRetBool() {
                 return retBool;
+        }
+
+        public Boolean validate() throws GenericBusinessException {
+                if (INDEX == null || INDEX.equals("")){
+                        throw new GenericBusinessException("INDEX IS NOT NULL");
+                }
+                if (INDEX_TYPE == null || INDEX_TYPE.equals("")){
+                        throw new GenericBusinessException("INDEX_TYPE IS NOT NULL");
+                }
+                return true;
         }
 }
