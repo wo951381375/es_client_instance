@@ -22,7 +22,7 @@ public class BuilderClient {
          * 4. 查询下标注意: size 最大不超过 10000, 超过则使用游标查询方式 --> 未实现
          * 5. 查询实体类增加类注解:@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class), 统一驼峰命名规范
          * 6. 对于特殊要求字段增加字段注解: @JsonProperty("")       package com.fasterxml.jackson.annotation.JsonProperty;, 注意: 入参json与返回值 json 会相应变化
-         * 7. 默认查询方式不满足, 可重写 查询条件 PrepareQuery.getBoolQueryBuilder(obj,querEnum)
+         * 7. 默认查询方式不满足, 可重写 查询条件 PrepareQuery.getStringQueryBuilder(obj,querEnum)
          * Param:{
          *         client : 客户端实例       必填
          *         INDEX : 真实索引索引       必填
@@ -39,6 +39,19 @@ public class BuilderClient {
          * */
         public QueryFieldHandler queryFieldHandler(String index){
                 return new QueryFieldHandler(client).setINDEX(index);
+        }
+
+        /**
+         * 使用注意:
+         * Params:{
+         *         INDEX : 真实索引索引       必填
+         *         INDEXTYPE : 索引类型      必填
+         *         clazz: 返回值类型         必填
+         * }
+         *
+         * */
+        public QueryAllByFieldHandler queryMatchAllHandler(String index){
+                return new QueryAllByFieldHandler(client).setINDEX(index);
         }
 
 

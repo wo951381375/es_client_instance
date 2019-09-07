@@ -53,7 +53,6 @@ public class QueryFieldHandler<T> extends ESBaseHandler {
                 }
                 // 获取查询条件
                 BoolQueryBuilder boolQuery = this.handler.getBoolQueryBuilder(search, queryEnum);
-                System.out.println(boolQuery);
                 // 查询
                 SearchResponse response = this.prepareSearch(boolQuery);
                 if (Objects.isNull(response)){
@@ -99,7 +98,7 @@ public class QueryFieldHandler<T> extends ESBaseHandler {
                         .setFrom(from)
                         .setSize(size);
                 if (sortField != null && !sortField.equals("")){
-                        searchRequestBuilder.addSort(sortField,SortOrder.ASC);
+                        searchRequestBuilder.addSort(sortField,SortOrder.DESC);
                 }
                 return searchRequestBuilder.get();
         }

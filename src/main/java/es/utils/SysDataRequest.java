@@ -5,9 +5,9 @@
 
 package es.utils;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
+import org.apache.hadoop.hbase.shaded.org.apache.commons.configuration.ConfigurationException;
+import org.apache.hadoop.hbase.shaded.org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.hadoop.hbase.shaded.org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 
 public class SysDataRequest {
         private static PropertiesConfiguration config = null;

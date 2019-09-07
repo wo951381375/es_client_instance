@@ -5,6 +5,7 @@ public enum QueryEnum {
         matchQuery(2,"matchQuery","分词查询"),
         matchPhrasePrefixQuery(3,"matchPhrasePrefixQuery","前缀匹配查询"),
         matchPhraseQuery(4,"matchPhraseQuery","包含查询"),
+        wildCard(5,"wildCard","正则匹配查询"),
         UnKnown(99, "unKnown", "未知");
         ;
 

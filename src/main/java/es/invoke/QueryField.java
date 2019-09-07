@@ -40,7 +40,7 @@ public class QueryField<T> {
         if (queryEnum != null){
             queryFieldHandler.setQueryEnum(queryEnum);
         }
-        if (size>0 && size <10000){
+        if (size>0 && size <=10000){
             queryFieldHandler.setSize(size);
         }
         return queryFieldHandler.execute();

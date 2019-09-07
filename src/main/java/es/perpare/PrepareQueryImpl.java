@@ -41,7 +41,7 @@ public class PrepareQueryImpl implements PrepareQuery {
                                 }
                         }else if (valFlag){
                                 // 使用自定义查询方式, 默认使用精确查询
-                                QueryBuilder builder = this.getBoolQueryBuilder(field,value, queryEnum);
+                                QueryBuilder builder = this.getStringQueryBuilder(field,value, queryEnum);
                                 boolQuery.must(builder);
                         }else {
                                 if (value instanceof List){
@@ -77,7 +77,7 @@ public class PrepareQueryImpl implements PrepareQuery {
         /**
          * 根据查询条件拼接 查询数据
          * */
-        private QueryBuilder getBoolQueryBuilder(String field, Object value, QueryEnum queryEnum) {
+        public static QueryBuilder getStringQueryBuilder(String field, Object value, QueryEnum queryEnum) {
                 QueryBuilder builder = null;
                 switch (queryEnum){
                         case matchQuery:
@@ -88,6 +88,9 @@ public class PrepareQueryImpl implements PrepareQuery {
                                 break;
                         case matchPhrasePrefixQuery:
                                 builder = QueryBuilders.matchPhrasePrefixQuery(field, value);
+                                break;
+                        case wildCard:
+                                builder = QueryBuilders.wildcardQuery(field+KEYWORD,"*"+value.toString()+"*");
                                 break;
                         default:
                                 //String类型做精确查询需要使用keyword标识

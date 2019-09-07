@@ -49,7 +49,17 @@ public class BulkHandler<T> extends ESBaseHandler {
         public ESResult execute() throws GenericBusinessException {
                 validate();
                 doExecute();
-                return new ESResult(retBool,error,count.get());
+                StringBuilder msg = new StringBuilder();
+                if (params!= null){
+                        msg.append("Params: ").append(params.size()).append(", ");
+                }
+                if (count!= null){
+                        msg.append("Success: ").append(count.get()).append(", ");
+                }
+                if (error!= null){
+                        msg.append("Error: ").append(error.size()).append(", ");
+                }
+                return new ESResult(retBool, msg.toString(),error,count.get());
         }
 
         private void doExecute() {

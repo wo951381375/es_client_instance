@@ -63,6 +63,14 @@ public class ESResult<T> implements Serializable {
         this.t = t;
     }
 
+    public ESResult(boolean retBool, String message, T t, Long total) {
+        super();
+        this.retBool = retBool;
+        this.message = message;
+        this.t = t;
+        this.total = total;
+    }
+
     public ESResult<T> format(boolean retBool, String message, T t) {
         this.retBool = retBool;
         this.message = message;
@@ -76,6 +84,12 @@ public class ESResult<T> implements Serializable {
         return this;
     }
 
+    public ESResult<T> format(boolean retBool, T t) {
+        this.retBool = retBool;
+        this.t = t;
+        return this;
+    }
+
     public ESResult<T> format(boolean retBool, String message, T t, int code) {
         this.retBool = retBool;
         this.message = message;
@@ -83,6 +97,7 @@ public class ESResult<T> implements Serializable {
         this.code = code;
         return this;
     }
+    
 
     public static <T> ESResult<T> newResult() {
         return new ESResult<T>();
