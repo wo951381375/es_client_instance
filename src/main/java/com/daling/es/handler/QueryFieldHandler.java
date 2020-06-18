@@ -1,11 +1,13 @@
 package com.daling.es.handler;
 
 import com.daling.es.enums.QueryEnum;
+import com.daling.es.perpare.DefineSource;
+import com.daling.es.perpare.DefineSourceImpl;
 import com.daling.es.perpare.PrepareQuery;
 import com.daling.es.perpare.PrepareQueryImpl;
 import com.daling.es.result.ESResult;
 import com.daling.es.utils.JsonNoNullUtil;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 import com.google.common.collect.Lists;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -37,6 +39,15 @@ public class QueryFieldHandler<T> extends ESBaseHandler {
 
         private QueryEnum queryEnum = QueryEnum.termsQuery;
 
+        /**
+         * 是否自定义返回结果
+         * */
+        private boolean isDefineSource;
+
+        private DefineSource source = new DefineSourceImpl();
+
+        private Object defineSource;
+
         public QueryFieldHandler(TransportClient client) {
                 this.client = client;
         }
@@ -53,6 +64,9 @@ public class QueryFieldHandler<T> extends ESBaseHandler {
                 }
                 // 获取查询条件
                 BoolQueryBuilder boolQuery = this.handler.getBoolQueryBuilder(search, queryEnum);
+                if (boolQuery == null){
+                        return;
+                }
                 // 查询
                 SearchResponse response = this.prepareSearch(boolQuery);
                 if (Objects.isNull(response)){
@@ -100,6 +114,10 @@ public class QueryFieldHandler<T> extends ESBaseHandler {
                 if (sortField != null && !sortField.equals("")){
                         searchRequestBuilder.addSort(sortField,SortOrder.DESC);
                 }
+                if (isDefineSource){
+                        searchRequestBuilder.setFetchSource(true);
+                        searchRequestBuilder.setFetchSource(source.getSourceIncludes(defineSource),source.getSourceExcludes(defineSource));
+                }
                 return searchRequestBuilder.get();
         }
 
@@ -145,6 +163,21 @@ public class QueryFieldHandler<T> extends ESBaseHandler {
 
         public QueryFieldHandler setQueryEnum(QueryEnum queryEnum) {
                 this.queryEnum = queryEnum;
+                return this;
+        }
+
+        public QueryFieldHandler isDefineSource(boolean defineSource) {
+                isDefineSource = defineSource;
+                return this;
+        }
+
+        public QueryFieldHandler setSource(DefineSource source) {
+                this.source = source;
+                return this;
+        }
+
+        public QueryFieldHandler setDefineSource(Object defineSource) {
+                this.defineSource = defineSource;
                 return this;
         }
 

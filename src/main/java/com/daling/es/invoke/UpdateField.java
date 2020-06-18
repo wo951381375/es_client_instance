@@ -5,7 +5,7 @@ import com.daling.es.enums.QueryEnum;
 import com.daling.es.handler.UpdateHandler;
 import com.daling.es.perpare.PrepareQuery;
 import com.daling.es.result.ESResult;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 
 import java.util.Map;
 

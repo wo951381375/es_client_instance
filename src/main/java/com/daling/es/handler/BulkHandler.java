@@ -1,9 +1,10 @@
 package com.daling.es.handler;
 
+import com.daling.commodity.commons.Commons;
 import com.daling.es.result.ESResult;
 import com.daling.es.utils.JsonNoNullUtil;
 import com.daling.es.utils.JsonUtil;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.*;
@@ -11,6 +12,7 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -157,6 +159,9 @@ public class BulkHandler<T> extends ESBaseHandler {
                 int size = request.requests().size();
                 if (size == 0){
                         return null;
+                }
+                if (list.size() <= Commons.BULK_REFRESH_INDEX_MAX_COUNT){
+                        bulk.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
                 }
                 return bulk;
         }

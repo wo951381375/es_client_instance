@@ -2,7 +2,7 @@ package com.daling.es.handler;
 
 import com.daling.es.result.ESResult;
 import com.daling.es.utils.JsonNoNullUtil;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 import com.google.common.collect.Lists;
 import org.elasticsearch.action.get.MultiGetItemResponse;
 import org.elasticsearch.action.get.MultiGetResponse;

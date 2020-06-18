@@ -4,7 +4,7 @@ import com.daling.es.enums.QueryEnum;
 import com.daling.es.perpare.PrepareQuery;
 import com.daling.es.perpare.PrepareQueryImpl;
 import com.daling.es.result.ESResult;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
@@ -14,7 +14,7 @@ import org.elasticsearch.script.ScriptType;
 
 import java.util.Map;
 
-public class UpdateHandler extends ESBaseHandler {
+public class UpdateHandler extends ESBaseHandler{
 
     private Object search;
 
@@ -38,6 +38,9 @@ public class UpdateHandler extends ESBaseHandler {
 
         // 获取查询条件
         BoolQueryBuilder boolQuery = this.handler.getBoolQueryBuilder(search, queryEnum);
+        if (boolQuery == null){
+            return;
+        }
         this.getUpdateGoodsByFiledCount(param, boolQuery);
         this.retBool = true;
     }
@@ -49,6 +52,7 @@ public class UpdateHandler extends ESBaseHandler {
                 .filter(boolQuery)
                 .source(INDEX)
                 .script(script)
+                .refresh(true)
                 .abortOnVersionConflict(false) //版本冲突,不终止服务,其余继续执行
                 .get();
         Long count = response.getUpdated();

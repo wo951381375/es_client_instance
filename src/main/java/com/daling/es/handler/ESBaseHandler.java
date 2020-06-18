@@ -1,7 +1,7 @@
 package com.daling.es.handler;
 
 import com.daling.es.client.BuilderClient;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 import org.elasticsearch.client.transport.TransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

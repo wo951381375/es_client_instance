@@ -3,7 +3,7 @@ package com.daling.es.invoke;
 import com.daling.es.client.BuilderClient;
 import com.daling.es.handler.EmptyHandler;
 import com.daling.es.result.ESResult;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 
 public class EmptyDocument {
 

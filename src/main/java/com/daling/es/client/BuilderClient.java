@@ -1,6 +1,6 @@
 package com.daling.es.client;
 
-import com.daling.es.config.ESInstance;
+import com.daling.es.config.ClientFactory;
 import com.daling.es.handler.*;
 import org.elasticsearch.client.transport.TransportClient;
 
@@ -9,7 +9,7 @@ public class BuilderClient {
         /**
          * 获取client
          * */
-        private static TransportClient client = ESInstance.esClient();
+        private static TransportClient client;
 
         private BuilderClient() {
         }
@@ -38,6 +38,7 @@ public class BuilderClient {
          *
          * */
         public QueryFieldHandler queryFieldHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new QueryFieldHandler(client).setINDEX(index);
         }
 
@@ -51,6 +52,7 @@ public class BuilderClient {
          *
          * */
         public QueryAllByFieldHandler queryMatchAllHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new QueryAllByFieldHandler(client).setINDEX(index);
         }
 
@@ -66,6 +68,7 @@ public class BuilderClient {
          *
          * */
         public QueryDocumentHandler queryDocumentHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new QueryDocumentHandler(client).setINDEX(index);
         }
 
@@ -91,6 +94,7 @@ public class BuilderClient {
          *
          * */
         public BulkHandler bulkHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new BulkHandler(client).setINDEX(index);
         }
 
@@ -104,6 +108,7 @@ public class BuilderClient {
          *
          * */
         public DeleteHandler deleteHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new DeleteHandler(client).setINDEX(index);
         }
 
@@ -111,6 +116,7 @@ public class BuilderClient {
          * 谨慎使用, 清空索引内所有数据
          * */
         public EmptyHandler emptyHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new EmptyHandler(client).setINDEX(index);
         }
 
@@ -118,11 +124,8 @@ public class BuilderClient {
          *
          * */
         public UpdateHandler updateHandler(String index){
+                client = ClientFactory.getInstance().getTransportClient(index);
                 return new UpdateHandler(client).setINDEX(index);
-        }
-
-        public TransportClient getClient() {
-                return client;
         }
 
         /**

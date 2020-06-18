@@ -1,11 +1,13 @@
 package com.daling.es.handler;
 
 import com.daling.es.enums.QueryEnum;
+import com.daling.es.perpare.DefineSource;
+import com.daling.es.perpare.DefineSourceImpl;
 import com.daling.es.perpare.PrepareQuery;
 import com.daling.es.perpare.PrepareQueryImpl;
 import com.daling.es.result.ESResult;
 import com.daling.es.utils.JsonNoNullUtil;
-import es.exception.GenericBusinessException;
+import com.daling.platform.exception.GenericBusinessException;
 import com.google.common.collect.Lists;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -37,6 +39,15 @@ public class QueryAllByFieldHandler<T> extends ESBaseHandler {
 
         private QueryEnum queryEnum = QueryEnum.termsQuery;
 
+        /**
+         * 是否自定义返回结果
+         * */
+        private boolean isDefineSource;
+
+        private DefineSource source = new DefineSourceImpl();
+
+        private Object defineSource;
+
         public QueryAllByFieldHandler(TransportClient client) {
                 this.client = client;
         }
@@ -55,6 +66,9 @@ public class QueryAllByFieldHandler<T> extends ESBaseHandler {
                 BoolQueryBuilder boolQuery = null;
                 if (search != null){
                         boolQuery = this.handler.getBoolQueryBuilder(search, queryEnum);
+                        if (boolQuery == null){
+                                return;
+                        }
                 }
 
                 SearchResponse response = this.getScrollResponse(boolQuery);
@@ -97,6 +111,10 @@ public class QueryAllByFieldHandler<T> extends ESBaseHandler {
                 }
                 if (sortField != null && !sortField.equals("")){
                         searchRequestBuilder.addSort(sortField,SortOrder.ASC);
+                }
+                if (isDefineSource){
+                        searchRequestBuilder.setFetchSource(true);
+                        searchRequestBuilder.setFetchSource(source.getSourceIncludes(defineSource),source.getSourceIncludes(defineSource));
                 }
                 return searchRequestBuilder.get();
         }
@@ -154,6 +172,21 @@ public class QueryAllByFieldHandler<T> extends ESBaseHandler {
 
         public QueryAllByFieldHandler setHandler(PrepareQuery handler) {
                 this.handler = handler;
+                return this;
+        }
+
+        public QueryAllByFieldHandler isDefineSource(boolean defineSource) {
+                isDefineSource = defineSource;
+                return this;
+        }
+
+        public QueryAllByFieldHandler setSource(DefineSource source) {
+                this.source = source;
+                return this;
+        }
+
+        public QueryAllByFieldHandler setDefineSource(Object defineSource) {
+                this.defineSource = defineSource;
                 return this;
         }
 

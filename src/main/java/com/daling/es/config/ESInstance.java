@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+
 public class ESInstance {
 
         static Logger log = LoggerFactory.getLogger(ESInstance.class);
@@ -48,7 +49,7 @@ public class ESInstance {
                         TransportClient client = null;
                         try {
                                 log.info("ES ready ---------> "+CLUSTER_NAME+"---"+CLUSTER_NODES);
-                                String[] nodes = CLUSTER_NODES.split(",");
+                                String[] nodes = CLUSTER_NODES.split("&");
                                 client = new PreBuiltTransportClient(settings);
                                 for (String node : nodes) {
                                         client.addTransportAddress(new TransportAddress(InetAddress.getByName(node), CLUSTER_PORT));

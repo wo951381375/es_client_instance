@@ -19,11 +19,11 @@ public class PrepareQueryImpl implements PrepareQuery {
 
         @Override
         public BoolQueryBuilder getBoolQueryBuilder(Object obj, QueryEnum queryEnum) {
-                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 Map<String, Object> map = JsonNoNullUtil.transFormationMapNoNullVal(obj,Map.class);
                 if (Objects.isNull(map) || map.isEmpty()){
-                        return boolQuery;
+                        return null;
                 }
+                BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 Set<Map.Entry<String, Object>> entries = map.entrySet();
                 for (Map.Entry<String, Object> entry : entries){
                         String field = entry.getKey();
